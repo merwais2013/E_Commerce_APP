@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<!-- Header-->
+<header class="bg-dark py-5">
+    <div class="container px-4 px-lg-5 my-5">
+        <div class="text-center text-white">
+            <h1 class="display-4 fw-bolder">Your Checkout</h1>
+            <p class="lead fw-normal text-white-50 mb-0">Here you can checkout your payment!</p>
+        </div>
+    </div>
+</header>
+<br><br>
+
+<div class="container">
+  <div class="row">
+    <center>
+    <div class="col-md-3 mt-5 mb-5">
+      <div class="card">
+        <div class="card-header fw-bold">
+          Summary of Orders
+        </div>
+        <div class="card-body">
+          {% for product in cart_products %}
+          <small>
+          <p>{{ product.name }} </p>
+            {% if product.is_sale %}
+            <p>{{ product.discount_price | intcomma }}</p>
+            {% else %}
+            <p>{{ product.price | intcomma }}</p>
+            {% endif %}
+            <p>Numbers:</p>
+            {% for key,value in quantities.items %}
+              {% if key == product.id|slugify %}
+                <option>{{ value }}</option>
+              {% endif %}
+
+            {% endfor %}
+          </small>
+          <hr>
+          {% endfor %}
+        <p> Total:  {{ total }} $</p>
+          <a href="{% url 'cart-summary' %}" class="btn btn-warning">Edit your cart</a>
+        </div>
+      </div>
+      <br>
+      <div class="card">
+        <div class="card-header fw-bold">
+          Shipping details
+        </div>
+        <div class="card-body">
+          {{ shipping_form.as_p }}
+          <a href="#" class="btn btn-outline-secondary">Continue to the payment</a>
+        </div>
+      </div>
+    </div>
+  </center>
+  </div>
+</div>
+
+
+
+{% endblock content %}

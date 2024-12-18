@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block content %}
+<br><br><br><br><br>
+<div class="container">
+  <div class="card mb-3">
+    <div class="row g-0">
+      <div class="col-md-4">
+        <img src="{{ product.picture.url }}" class="img-fluid rounded-start" alt="...">
+      </div>
+      <div class="col-md-8">
+        <div class="card-body">
+          <h5 class="card-title">{{ product.name }}</h5>
+          <p class="card-text">{{ product.description }}</p>
+          {% if product.is_sale %}
+          <p class="card-text">price: 💵<s>{{ product.price | intcomma }} </s>  - {{ product.discount_price | intcomma }}</p>
+          {% else %}
+          <p class="card-text">price: 💵  {{ product.price | intcomma }}</p>
+          {% endif %}
+          Quantity:
+          <select class="form-select" id="cart-qty">
+            {% for key,value in quantities.items %}
+            {% if key == product.id|slugify %}
+              <option selected>{{ value }}</option>
+            {% endif %}
+            {% endfor %}
+
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+          <br><br><br>
+          <button class="btn btn-secondary" type="button" value="{{ product.id }}" id="add-cart">Add to Cart</button>
+          <a class="btn btn-secondary" href="{% url 'home' %}">Back to main page</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<br><br><br><br><br>
+
+<script>
+  const cart_btn = document.querySelector('#add-cart')
+  cart_btn.addEventListener('click', function (e) {
+    e.preventDefault();
+
+    // Replace with the correct CSRF token and URL
+    const csrfToken = '{{ csrf_token }}';
+    const url = '{% url "cart-add" %}';
+
+    // Get the values from the elements
+    const productId = document.getElementById('add-cart').value;
+    const selectElement = document.getElementById('cart-qty');
+    const productQty = selectElement.options[selectElement.selectedIndex].text;
+    console.log(productQty);
+
+    // Prepare the data to be sent
+    const data = new FormData();
+    data.append('product_id', productId);
+    data.append('product_qty', productQty);
+    data.append('csrfmiddlewaretoken', csrfToken);
+    data.append('action', 'post');
+
+    // Create and send the AJAX request
+    fetch(url, {
+        method: 'POST',
+        body: data,
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(json => {
+        document.getElementById('cart_quantity').textContent = json.qty;
+        // alert('Quantity updated: ' + json.qty);
+        location.reload()
+    })
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    });
+});
+
+</script>
+
+
+{% endblock content %}
